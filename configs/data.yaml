@@ -1,0 +1,39 @@
+dataset: zelda
+
+paths:
+  zelda: datasets/zelda/zelda_frames.h5
+  sonic: datasets/sonic/sonic_frames.h5
+
+# context_length -- TinyWorlds' validated default is 4, not 8-16.
+# Start here: faster iteration, lower VRAM, fewer surprises while you're
+# still validating the pipeline. Raising this later is a config change,
+# not an architecture change.
+seq_len: 4
+
+# frame_size -- matches TinyWorlds' full_train.py default. Their per-class
+# defaults (Zelda/Sonic = 128) are for standalone use of the Dataset class;
+# the actual training pipeline overrides everything to 64.
+frame_size: 64
+
+# patch_size -- at frame_size=64, this gives a 16x16=256 patch grid per frame.
+# Matches TinyWorlds' default, needed later by the tokenizer's patch embedding.
+patch_size: 4
+
+# frame_skip -- temporal subsampling when slicing a sequence out of the cached
+# array. Zelda's tuned default: native capture ~60fps, target ~15fps -> skip 4.
+# Verify this visually with visualize_batch.py once the real file is downloaded --
+# I can't inspect the cached h5's native fps from outside, only the code that
+# produced it.
+frame_skip: 4
+
+# skip junk frames at the start of the cached array (title screen / intro).
+load_start_index:
+  zelda: 1000
+  sonic: 100
+
+train_frac: 0.9   # held-out val split -- TinyWorlds disables this by default, we don't
+
+batch_size: 32     # conservative starting point. TinyWorlds runs the tokenizer
+                    # at batch_size=350 since embed_dim there is tiny (32) --
+                    # raise this once you've confirmed actual VRAM headroom.
+num_workers: 2
