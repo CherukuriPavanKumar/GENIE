@@ -1,0 +1,42 @@
+# ── Dynamics Model training config ───────────────────────────────
+# Usage: python scripts/train_dynamics.py --config configs/dynamics.yaml
+
+# ── Data ─────────────────────────────────────────────────────────
+dataset: zelda
+data_config: configs/data.yaml
+
+# ── Pretrained Models ────────────────────────────────────────────
+video_tokenizer_ckpt: checkpoints/video_tokenizer/best.pt
+video_tokenizer_config: configs/video_tokenizer.yaml
+action_tokenizer_ckpt: checkpoints/action_tokenizer/best.pt
+action_tokenizer_config: configs/action_tokenizer.yaml
+
+# ── Model ────────────────────────────────────────────────────────
+embed_dim: 32
+num_heads: 8
+hidden_dim: 128
+num_blocks: 4        # STT layers
+max_frames: 16
+
+# ── MaskGIT Training ────────────────────────────────────────────
+mask_ratio_min: 0.5
+mask_ratio_max: 1.0
+
+# ── MaskGIT Inference ───────────────────────────────────────────
+num_maskgit_steps: 12
+schedule_k: 5.0
+temperature: 0.0     # 0 = argmax, >0 = sampling
+
+# ── Training ─────────────────────────────────────────────────────
+epochs: 100
+batch_size: 32
+lr: 3.0e-4
+weight_decay: 0.01
+grad_clip: 1.0
+warmup_steps: 500
+
+# ── Logging & Checkpointing ─────────────────────────────────────
+log_every: 50
+save_every: 5
+vis_every: 10        # autoregressive generation visualization
+checkpoint_dir: checkpoints/dynamics
