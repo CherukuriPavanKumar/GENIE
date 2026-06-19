@@ -2,7 +2,7 @@
 # Usage: python scripts/train_action_tokenizer.py --config configs/action_tokenizer.yaml
 
 # ── Data ─────────────────────────────────────────────────────────
-dataset: zelda
+dataset: pole_position
 data_config: configs/data.yaml          # inherits paths, seq_len, etc.
 
 # ── Pretrained Video Tokenizer ───────────────────────────────────
