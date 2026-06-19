@@ -22,10 +22,11 @@ import matplotlib.animation as animation
 
 from datasets.loaders.zelda_dataset import ZeldaDataset
 from datasets.loaders.sonic_dataset import SonicDataset
+from datasets.loaders.pole_position_dataset import PolePositionDataset
 from inference.model_loader import load_pretrained_models
 from inference.rollout import RolloutState
 
-DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset}
+DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset, "pole_position": PolePositionDataset}
 
 
 def main():

@@ -2,7 +2,7 @@
 # Usage: python scripts/play.py --config configs/rollout.yaml
 
 # ── Data (for seeding initial frames) ────────────────────────────
-dataset: zelda
+dataset: pole_position
 data_config: configs/data.yaml
 
 # ── Pretrained Model Configs ─────────────────────────────────────

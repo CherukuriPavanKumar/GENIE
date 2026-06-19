@@ -22,10 +22,11 @@ from tqdm import tqdm
 
 from datasets.loaders.zelda_dataset import ZeldaDataset
 from datasets.loaders.sonic_dataset import SonicDataset
+from datasets.loaders.pole_position_dataset import PolePositionDataset
 from tokenizer.video_tokenizer import VideoTokenizer
 from lam.latent_action_model import LatentActionModel
 
-DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset}
+DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset, "pole_position": PolePositionDataset}
 
 
 def get_cosine_schedule_with_warmup(optimizer, warmup_steps, total_steps):
