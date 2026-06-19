@@ -24,7 +24,7 @@ patch_size: 4
 # Verify this visually with visualize_batch.py once the real file is downloaded --
 # I can't inspect the cached h5's native fps from outside, only the code that
 # produced it.
-frame_skip: 4
+frame_skip: 8
 
 # skip junk frames at the start of the cached array (title screen / intro).
 load_start_index:

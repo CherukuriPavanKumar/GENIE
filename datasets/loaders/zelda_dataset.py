@@ -10,7 +10,7 @@ class ZeldaDataset(FrameCacheDataset):
         h5_path: str = "datasets/zelda/zelda_frames.h5",
         seq_len: int = 4,
         frame_size: int = 64,
-        frame_skip: int = 4,
+        frame_skip: int = 8,
         load_start_index: int = 1000,
         split: str = "train",
         train_frac: float = 0.9,
