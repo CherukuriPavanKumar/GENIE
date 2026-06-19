@@ -1,7 +1,7 @@
 """
 Train the Dynamics Model (MaskGIT-style masked token prediction).
 
-This is Phase 5 of the Mini Genie roadmap.
+This is Phase 5 of the Mini Genie roadmap.  
 Requires trained Video Tokenizer and Action Tokenizer checkpoints.
 
 Usage:

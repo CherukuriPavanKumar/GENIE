@@ -21,7 +21,7 @@ var_weight: 100.0    # Weight for the auxiliary variance loss
 var_target: 0.01     # Target variance threshold for anti-collapse objective
 
 # ── Training ─────────────────────────────────────────────────────
-epochs: 100
+epochs: 20
 batch_size: 32       # override data config; reduce if OOM
 lr: 3.0e-4
 weight_decay: 0.01

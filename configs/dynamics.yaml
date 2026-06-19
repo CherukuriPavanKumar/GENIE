@@ -28,7 +28,7 @@ schedule_k: 5.0
 temperature: 0.0     # 0 = argmax, >0 = sampling
 
 # ── Training ─────────────────────────────────────────────────────
-epochs: 100
+epochs: 20
 batch_size: 32
 lr: 3.0e-4
 weight_decay: 0.01
