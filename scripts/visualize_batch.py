@@ -15,10 +15,11 @@ import matplotlib.pyplot as plt
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
-from datasets.loaders.sonic_dataset import SonicDataset
 from datasets.loaders.zelda_dataset import ZeldaDataset
+from datasets.loaders.sonic_dataset import SonicDataset
+from datasets.loaders.pole_position_dataset import PolePositionDataset
 
-DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset}
+DATASET_CLASSES = {"zelda": ZeldaDataset, "sonic": SonicDataset, "pole_position": PolePositionDataset}
 
 
 def main():

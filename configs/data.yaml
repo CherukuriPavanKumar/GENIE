@@ -1,8 +1,10 @@
-dataset: zelda
+dataset: pole_position
 
 paths:
   zelda: datasets/zelda/zelda_frames.h5
   sonic: datasets/sonic/sonic_frames.h5
+  pole_position: datasets/pole_position/pole_position_frames.h5
+
 
 # context_length -- TinyWorlds' validated default is 4, not 8-16.
 # Start here: faster iteration, lower VRAM, fewer surprises while you're
@@ -30,6 +32,7 @@ frame_skip: 8
 load_start_index:
   zelda: 1000
   sonic: 100
+  pole_position: 100
 
 train_frac: 0.9   # held-out val split -- TinyWorlds disables this by default, we don't
 
