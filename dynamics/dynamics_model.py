@@ -113,9 +113,9 @@ class DynamicsModel(nn.Module):
         """
         B, T, P, L = latents.shape
 
-        # Apply masking during training
+        # Apply masking during training (or validation when training=True is passed)
         mask = None
-        if training and self.training:
+        if training:
             latents, mask = self._apply_masking(latents, mask_ratio_min, mask_ratio_max)
 
         # Embed latents → transformer dimension
@@ -133,7 +133,7 @@ class DynamicsModel(nn.Module):
 
         # Compute masked cross-entropy loss
         loss = None
-        if training and self.training and targets is not None:
+        if training and targets is not None:
             logits_flat = logits.reshape(-1, self.codebook_size)  # [B*T*P, V]
             targets_flat = targets.reshape(-1)                    # [B*T*P]
             mask_flat = mask.reshape(-1).float()                  # [B*T*P]
