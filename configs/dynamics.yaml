@@ -2,7 +2,7 @@
 # Usage: python scripts/train_dynamics.py --config configs/dynamics.yaml
 
 # ── Data ─────────────────────────────────────────────────────────
-dataset: zelda
+dataset: pole_position
 data_config: configs/data.yaml
 
 # ── Pretrained Models ────────────────────────────────────────────
