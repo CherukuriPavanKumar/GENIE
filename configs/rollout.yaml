@@ -1,0 +1,37 @@
+# ── Rollout / Interactive Play config ────────────────────────────
+# Usage: python scripts/play.py --config configs/rollout.yaml
+
+# ── Data (for seeding initial frames) ────────────────────────────
+dataset: zelda
+data_config: configs/data.yaml
+
+# ── Pretrained Model Configs ─────────────────────────────────────
+# These point to the YAML files that define model architecture params.
+# Follows the same pattern as configs/dynamics.yaml.
+video_tokenizer_config: configs/video_tokenizer.yaml
+action_tokenizer_config: configs/action_tokenizer.yaml
+dynamics_config: configs/dynamics.yaml
+
+# ── Pretrained Model Checkpoints ─────────────────────────────────
+video_tokenizer_ckpt: checkpoints/video_tokenizer/best.pt
+action_tokenizer_ckpt: checkpoints/action_tokenizer/best.pt
+dynamics_ckpt: checkpoints/dynamics/best.pt
+
+# ── Rollout Settings ────────────────────────────────────────────
+# Context window length — must match the seq_len the dynamics model
+# was trained on (data.yaml's seq_len=4).
+context_length: 4
+
+# MaskGIT iterative decoding params — match dynamics training defaults.
+num_maskgit_steps: 12
+
+# temperature=0.0 means deterministic argmax decoding (most consistent).
+# Values >0 enable categorical sampling for more varied/less repetitive
+# generation, at the cost of visual consistency and occasional artifacts.
+temperature: 0.0
+
+schedule_k: 5.0
+
+# ── Display ─────────────────────────────────────────────────────
+# Native frame size is 64x64. display_scale=8 means 512x512 on screen.
+display_scale: 8
