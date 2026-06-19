@@ -178,6 +178,7 @@ def main():
         embed_dim=cfg.embed_dim, num_heads=cfg.num_heads, hidden_dim=cfg.hidden_dim,
         num_blocks=cfg.num_blocks, latent_dim=vt_cfg.latent_dim, num_bins=vt_cfg.num_bins,
         action_dim=at_cfg.action_dim, max_frames=cfg.max_frames,
+        frame_size=vt_cfg.frame_size, patch_size=vt_cfg.patch_size,
     ).to(device)
 
     n_params = sum(p.numel() for p in model.parameters())
