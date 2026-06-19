@@ -60,6 +60,9 @@ class ActionDecoder(nn.Module):
         # STTransformer with FiLM conditioning on actions
         self.transformer = STTransformer(embed_dim, num_heads, hidden_dim, num_blocks, causal=True, condition_dim=embed_dim)
         
+        # Learnable mask token for predicting future frames
+        self.mask_token = nn.Parameter(torch.randn(1, 1, 1, embed_dim) * 0.02)
+        
     def forward(self, z_initial, action_latents, T):
         # z_initial: [B, 1, P, E] -> first frame patch embeddings
         # action_latents: [B, T-1, action_dim] -> FSQ quantized actions
@@ -68,10 +71,7 @@ class ActionDecoder(nn.Module):
         
         # 1. Prepare masked frame sequence
         # We start with the first frame, and mask all subsequent frames
-        # In this latent space, a simple mask could be learned or just zeros.
-        # Let's use a learned mask token for unknown frames.
-        if not hasattr(self, 'mask_token'):
-            self.mask_token = nn.Parameter(torch.randn(1, 1, 1, E).to(z_initial.device))
+        # using the learned mask token for unknown frames.
             
         mask_tokens = self.mask_token.expand(B, T - 1, P, E)
         
