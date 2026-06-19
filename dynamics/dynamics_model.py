@@ -24,7 +24,8 @@ from tokenizer.st_transformer import STTransformer
 
 class DynamicsModel(nn.Module):
     def __init__(self, embed_dim=32, num_heads=8, hidden_dim=128, num_blocks=4,
-                 latent_dim=5, num_bins=4, action_dim=2, max_frames=16):
+                 latent_dim=5, num_bins=4, action_dim=2, max_frames=16,
+                 frame_size=64, patch_size=4):
         super().__init__()
         self.latent_dim = latent_dim
         self.codebook_size = num_bins ** latent_dim
@@ -32,12 +33,21 @@ class DynamicsModel(nn.Module):
         # Embed FSQ latent vectors into transformer dimension
         self.latent_embed = nn.Linear(latent_dim, embed_dim)
 
-        # Positional encodings
-        # We don't know frame_size here, but we know P = (frame_size/patch_size)^2.
-        # We'll register PE buffers lazily or require them as params.
-        # For now, we pass num_patches_per_side and compute.
         self.embed_dim = embed_dim
         self.max_frames = max_frames
+
+        # Register positional encoding buffers immediately
+        num_patches_per_side = frame_size // patch_size
+        self.register_buffer(
+            "spatial_pe",
+            build_spatial_pe(num_patches_per_side, num_patches_per_side, self.embed_dim),
+            persistent=False,
+        )
+        self.register_buffer(
+            "temporal_pe",
+            build_temporal_pe(self.max_frames, self.embed_dim),
+            persistent=False,
+        )
 
         # STT backbone with FiLM conditioning on action embeddings
         self.transformer = STTransformer(
@@ -53,21 +63,6 @@ class DynamicsModel(nn.Module):
 
         # Learnable mask token in latent space [1, 1, 1, latent_dim]
         self.mask_token = nn.Parameter(torch.randn(1, 1, 1, latent_dim) * 0.02)
-
-    def register_pe_buffers(self, num_patches_h, num_patches_w):
-        """Register positional encoding buffers. Call once after knowing patch grid size."""
-        if not hasattr(self, '_pe_registered') or not self._pe_registered:
-            self.register_buffer(
-                "spatial_pe",
-                build_spatial_pe(num_patches_h, num_patches_w, self.embed_dim),
-                persistent=False,
-            )
-            self.register_buffer(
-                "temporal_pe",
-                build_temporal_pe(self.max_frames, self.embed_dim),
-                persistent=False,
-            )
-            self._pe_registered = True
 
     def _apply_masking(self, latents, mask_ratio_min=0.5, mask_ratio_max=1.0):
         """Apply random MaskGIT masking during training.
@@ -117,10 +112,6 @@ class DynamicsModel(nn.Module):
             loss:      scalar or None — masked cross-entropy loss
         """
         B, T, P, L = latents.shape
-
-        # Lazily register PE buffers based on P
-        n = int(math.sqrt(P))
-        self.register_pe_buffers(n, n)
 
         # Apply masking during training
         mask = None
