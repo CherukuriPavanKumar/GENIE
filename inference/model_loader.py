@@ -54,17 +54,18 @@ def build_index_to_latents_fn(num_bins, latent_dim):
     return index_to_latents
 
 
-def load_pretrained_models(config_path="configs/rollout.yaml", device=None):
-    """Load all three frozen pretrained models for interactive rollout.
+def load_pretrained_models(config_path="configs/rollout.yaml", device=None, load_dynamics=True):
+    """Load pretrained models for interactive rollout or inspection.
 
     Args:
         config_path: path to configs/rollout.yaml
         device: torch device (auto-detects cuda if available)
+        load_dynamics: if False, skips loading the Dynamics Model and returns None
 
     Returns:
         video_tokenizer: frozen VideoTokenizer
         lam: frozen LatentActionModel
-        dynamics_model: frozen DynamicsModel
+        dynamics_model: frozen DynamicsModel (or None)
         video_index_to_latents: callable(indices) -> latents for video codebook (latent_dim=5)
         action_index_to_latents: callable(indices) -> latents for action codebook (latent_dim=2)
     """
@@ -76,7 +77,8 @@ def load_pretrained_models(config_path="configs/rollout.yaml", device=None):
     # Load component configs — same pattern as scripts/train_dynamics.py
     vt_cfg = OmegaConf.load(cfg.video_tokenizer_config)
     at_cfg = OmegaConf.load(cfg.action_tokenizer_config)
-    dyn_cfg = OmegaConf.load(cfg.dynamics_config)
+    if load_dynamics:
+        dyn_cfg = OmegaConf.load(cfg.dynamics_config)
 
     # ── Video Tokenizer ─────────────────────────────────────────
     vt_ckpt_path = Path(cfg.video_tokenizer_ckpt)
@@ -118,24 +120,26 @@ def load_pretrained_models(config_path="configs/rollout.yaml", device=None):
     print(f"✓ Loaded LAM from {at_ckpt_path}")
 
     # ── Dynamics Model ──────────────────────────────────────────
-    dyn_ckpt_path = Path(cfg.dynamics_ckpt)
-    if not dyn_ckpt_path.exists():
-        raise FileNotFoundError(
-            f"Dynamics Model checkpoint not found at: {dyn_ckpt_path.resolve()}\n"
-            f"Train it first with: python scripts/train_dynamics.py"
-        )
+    dynamics_model = None
+    if load_dynamics:
+        dyn_ckpt_path = Path(cfg.dynamics_ckpt)
+        if not dyn_ckpt_path.exists():
+            raise FileNotFoundError(
+                f"Dynamics Model checkpoint not found at: {dyn_ckpt_path.resolve()}\n"
+                f"Train it first with: python scripts/train_dynamics.py"
+            )
 
-    dynamics_model = DynamicsModel(
-        embed_dim=dyn_cfg.embed_dim, num_heads=dyn_cfg.num_heads, hidden_dim=dyn_cfg.hidden_dim,
-        num_blocks=dyn_cfg.num_blocks, latent_dim=vt_cfg.latent_dim, num_bins=vt_cfg.num_bins,
-        action_dim=at_cfg.action_dim, max_frames=dyn_cfg.max_frames,
-        frame_size=vt_cfg.frame_size, patch_size=vt_cfg.patch_size,
-    ).to(device)
-    dyn_ckpt = torch.load(dyn_ckpt_path, map_location=device, weights_only=False)
-    dynamics_model.load_state_dict(dyn_ckpt["model"])
-    dynamics_model.eval()
-    dynamics_model.requires_grad_(False)
-    print(f"✓ Loaded Dynamics Model from {dyn_ckpt_path}")
+        dynamics_model = DynamicsModel(
+            embed_dim=dyn_cfg.embed_dim, num_heads=dyn_cfg.num_heads, hidden_dim=dyn_cfg.hidden_dim,
+            num_blocks=dyn_cfg.num_blocks, latent_dim=vt_cfg.latent_dim, num_bins=vt_cfg.num_bins,
+            action_dim=at_cfg.action_dim, max_frames=dyn_cfg.max_frames,
+            frame_size=vt_cfg.frame_size, patch_size=vt_cfg.patch_size,
+        ).to(device)
+        dyn_ckpt = torch.load(dyn_ckpt_path, map_location=device, weights_only=False)
+        dynamics_model.load_state_dict(dyn_ckpt["model"])
+        dynamics_model.eval()
+        dynamics_model.requires_grad_(False)
+        print(f"✓ Loaded Dynamics Model from {dyn_ckpt_path}")
 
     # ── Index-to-latents helpers ────────────────────────────────
     # Video codebook: latent_dim=5, num_bins=4 → 1024 tokens

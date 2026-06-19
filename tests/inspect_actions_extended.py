@@ -39,8 +39,8 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Load models
-    video_tokenizer, lam, _, _, _ = load_pretrained_models(args.config, device)
+    # Load models (Dynamics model not needed for inspection)
+    video_tokenizer, lam, _, _, _ = load_pretrained_models(args.config, device, load_dynamics=False)
 
     # Load validation dataset
     dataset_name = cfg.dataset
