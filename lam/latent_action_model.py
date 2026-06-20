@@ -94,9 +94,10 @@ class ActionDecoder(nn.Module):
 
 
 class LatentActionModel(nn.Module):
-    def __init__(self, embed_dim=32, num_heads=8, hidden_dim=128, num_blocks=4, action_dim=2, num_bins=4, var_weight=100.0, var_target=0.01):
+    def __init__(self, embed_dim=32, num_heads=8, hidden_dim=128, num_blocks=4, action_dim=2, num_bins=4, var_weight=100.0, var_target=0.01, entropy_weight=10.0):
         super().__init__()
         self.var_weight = var_weight
+        self.entropy_weight = entropy_weight
         self.var_target = var_target
         self.encoder = ActionEncoder(embed_dim, num_heads, hidden_dim, num_blocks, action_dim, num_bins)
         self.quantizer = FiniteScalarQuantizer(action_dim, num_bins)
@@ -128,9 +129,22 @@ class LatentActionModel(nn.Module):
         action_variance = torch.var(flattened_actions, dim=0).mean()
         var_loss = self.var_weight * F.relu(self.var_target - action_variance)
         
-        total_loss = recon_loss + var_loss
+        # 5. Compute Entropy Loss to penalize dead action codes
+        # Unlike variance (which measures continuous spread), entropy directly
+        # measures whether all discrete action codes are being used uniformly.
+        action_indices = self.quantizer.get_indices_from_latents(action_latents_q)
+        counts = torch.zeros(self.action_vocab_size, device=action_indices.device)
+        counts.scatter_add_(0, action_indices.reshape(-1),
+                            torch.ones_like(action_indices.reshape(-1), dtype=torch.float))
+        probs = counts / counts.sum().clamp_min(1)
+        probs = probs + 1e-8  # avoid log(0)
+        entropy = -(probs * probs.log()).sum()
+        max_entropy = torch.tensor(float(self.action_vocab_size), device=action_indices.device).log()
+        entropy_loss = self.entropy_weight * (max_entropy - entropy)
         
-        return total_loss, recon_loss, var_loss, action_latents_q
+        total_loss = recon_loss + var_loss + entropy_loss
+        
+        return total_loss, recon_loss, var_loss, entropy_loss, action_latents_q
 
     @torch.no_grad()
     def infer_actions(self, z):

@@ -12,10 +12,10 @@ action_tokenizer_ckpt: checkpoints/action_tokenizer/best.pt
 action_tokenizer_config: configs/action_tokenizer.yaml
 
 # ── Model ────────────────────────────────────────────────────────
-embed_dim: 32
+embed_dim: 64          # 2× wider (was 32) — much more capacity for token prediction
 num_heads: 8
-hidden_dim: 128
-num_blocks: 4        # STT layers
+hidden_dim: 256        # 2× wider FFN (was 128)
+num_blocks: 6          # 50% deeper (was 4)
 max_frames: 16
 
 # ── MaskGIT Training ────────────────────────────────────────────
@@ -28,8 +28,8 @@ schedule_k: 5.0
 temperature: 0.0     # 0 = argmax, >0 = sampling
 
 # ── Training ─────────────────────────────────────────────────────
-epochs: 30
-batch_size: 32
+epochs: 40             # 2× longer (was 20) for the larger model
+batch_size: 16         # Halved (was 32) for VRAM headroom
 lr: 3.0e-4
 weight_decay: 0.01
 grad_clip: 1.0
@@ -38,5 +38,5 @@ warmup_steps: 500
 # ── Logging & Checkpointing ─────────────────────────────────────
 log_every: 50
 save_every: 5
-vis_every: 10        # autoregressive generation visualization
+vis_every: 10          # autoregressive generation visualization
 checkpoint_dir: checkpoints/dynamics

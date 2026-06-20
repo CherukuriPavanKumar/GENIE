@@ -8,24 +8,24 @@ data_config: configs/data.yaml          # inherits paths, seq_len, etc.
 # ── Model ────────────────────────────────────────────────────────
 frame_size: 64
 patch_size: 4
-embed_dim: 32
+embed_dim: 64          # 2× wider (was 32) — more capacity for sharp reconstructions
 num_heads: 8
-hidden_dim: 128
-num_blocks: 4        # STT layers (encoder & decoder each)
-latent_dim: 5        # FSQ dimensions per token
-num_bins: 4          # FSQ levels per dimension → codebook = 4^5 = 1024
-max_frames: 16       # max temporal PE length
+hidden_dim: 256        # 2× wider FFN (was 128)
+num_blocks: 6          # 50% deeper (was 4)
+latent_dim: 5          # FSQ dimensions per token (unchanged — 41% codebook usage is healthy)
+num_bins: 4            # FSQ levels per dimension → codebook = 4^5 = 1024
+max_frames: 16         # max temporal PE length
 
 # ── Training ─────────────────────────────────────────────────────
-epochs: 25
-batch_size: 32       # override data config; reduce if OOM
+epochs: 40             # More training (was 25) for the larger model
+batch_size: 16         # Halved (was 32) for VRAM headroom with 2× wider model
 lr: 3.0e-4
 weight_decay: 0.01
 grad_clip: 1.0
-warmup_steps: 500    # linear warmup before cosine decay
+warmup_steps: 500      # linear warmup before cosine decay
 
 # ── Logging & Checkpointing ─────────────────────────────────────
-log_every: 50        # print loss every N steps
-save_every: 5        # save checkpoint every N epochs
-vis_every: 5         # save reconstruction comparison every N epochs
+log_every: 50          # print loss every N steps
+save_every: 5          # save checkpoint every N epochs
+vis_every: 5           # save reconstruction comparison every N epochs
 checkpoint_dir: checkpoints/video_tokenizer

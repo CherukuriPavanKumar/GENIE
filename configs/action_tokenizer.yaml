@@ -11,25 +11,26 @@ video_tokenizer_ckpt: checkpoints/video_tokenizer/best.pt
 video_tokenizer_config: configs/video_tokenizer.yaml
 
 # ── Model ────────────────────────────────────────────────────────
-embed_dim: 32        # Must match Video Tokenizer's embed_dim
+embed_dim: 64          # Match scaled Video Tokenizer embed_dim
 num_heads: 8
-hidden_dim: 128
-num_blocks: 2        # STT layers (LAM can be smaller than Video Tokenizer)
-action_dim: 2        # FSQ dimensions per action token
-num_bins: 4          # FSQ levels per dimension → action_vocab_size = 4^2 = 16
-var_weight: 100.0    # Weight for the auxiliary variance loss
-var_target: 0.01     # Target variance threshold for anti-collapse objective
+hidden_dim: 256        # Match scaled Video Tokenizer hidden_dim
+num_blocks: 4          # Deeper than before (was 2) for better action encoding
+action_dim: 2          # FSQ dimensions per action token
+num_bins: 4            # FSQ levels per dimension → action_vocab_size = 4^2 = 16
+var_weight: 500.0      # 5× stronger variance penalty (was 100)
+var_target: 0.05       # 5× higher variance target (was 0.01) — forces wider spread
+entropy_weight: 10.0   # NEW: penalizes dead action codes via entropy regularization
 
 # ── Training ─────────────────────────────────────────────────────
-epochs: 20
-batch_size: 32       # override data config; reduce if OOM
+epochs: 40             # 2× longer training (was 20) for stronger regularization
+batch_size: 16         # Halved for VRAM headroom with larger model
 lr: 3.0e-4
 weight_decay: 0.01
 grad_clip: 1.0
-warmup_steps: 500    # linear warmup before cosine decay
+warmup_steps: 500      # linear warmup before cosine decay
 
 # ── Logging & Checkpointing ─────────────────────────────────────
-log_every: 50        # print loss every N steps
-save_every: 5        # save checkpoint every N epochs
-vis_every: 5         # save reconstruction comparison every N epochs
+log_every: 50          # print loss every N steps
+save_every: 5          # save checkpoint every N epochs
+vis_every: 5           # save reconstruction comparison every N epochs
 checkpoint_dir: checkpoints/action_tokenizer
