@@ -10,7 +10,7 @@ paths:
 # Start here: faster iteration, lower VRAM, fewer surprises while you're
 # still validating the pipeline. Raising this later is a config change,
 # not an architecture change.
-seq_len: 4
+seq_len: 6
 
 # frame_size -- matches TinyWorlds' full_train.py default. Their per-class
 # defaults (Zelda/Sonic = 128) are for standalone use of the Dataset class;

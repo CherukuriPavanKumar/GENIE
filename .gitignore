@@ -10,7 +10,13 @@ wheels/
 .venv
 
 #datasets :)
-datasets/zelda/*.h5
-checkpoints/
 *.pt
 *.pth
+
+# checkpoints
+checkpoints/
+checkpoints_zelda/
+
+# datasets
+datasets/**/*.h5
+*.h5

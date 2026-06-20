@@ -183,6 +183,7 @@ def main():
         num_bins=cfg.num_bins,
         var_weight=cfg.var_weight,
         var_target=cfg.var_target,
+        entropy_weight=cfg.get('entropy_weight', 10.0),
     ).to(device)
 
     n_params = sum(p.numel() for p in model.parameters())
@@ -244,7 +245,7 @@ def main():
                 z_embed = video_tokenizer.decoder.latent_embed(z_q) # [B, T, P, E]
 
             # 2. Train LAM
-            total_loss, recon_loss, var_loss, action_latents_q = model(z_embed)
+            total_loss, recon_loss, var_loss, entropy_loss, action_latents_q = model(z_embed)
 
             optimizer.zero_grad()
             total_loss.backward()
@@ -258,7 +259,7 @@ def main():
 
             if global_step % cfg.log_every == 0:
                 lr_now = scheduler.get_last_lr()[0]
-                pbar.set_postfix(loss=f"{total_loss.item():.4f}", rec=f"{recon_loss.item():.4f}", var=f"{var_loss.item():.4f}", lr=f"{lr_now:.2e}")
+                pbar.set_postfix(loss=f"{total_loss.item():.4f}", rec=f"{recon_loss.item():.4f}", var=f"{var_loss.item():.4f}", ent=f"{entropy_loss.item():.4f}", lr=f"{lr_now:.2e}")
 
         avg_train_loss = epoch_loss / max(1, n_batches)
 
@@ -277,7 +278,7 @@ def main():
                 z_q = video_tokenizer.quantizer(z_latents)
                 z_embed = video_tokenizer.decoder.latent_embed(z_q)
                 
-                total_loss, recon_loss, var_loss, action_latents_q = model(z_embed)
+                total_loss, recon_loss, var_loss, entropy_loss, action_latents_q = model(z_embed)
                 
                 val_loss_total += total_loss.item()
                 val_batches += 1
