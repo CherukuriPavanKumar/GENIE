@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--actions", nargs='+', type=int, default=[9, 9, 9, 14, 14, 14],
                         help="List of action indices (0-15) to execute in sequence")
     parser.add_argument("--output", default="rollout.gif", help="Output GIF filename")
+    parser.add_argument("--fps", type=int, default=10, help="Framerate for the output GIF")
     args = parser.parse_args()
 
     cfg = OmegaConf.load(args.config)
@@ -107,8 +108,8 @@ def main():
         im.set_array(frames_to_save[frame_idx])
         return [im]
 
-    ani = animation.FuncAnimation(fig, update, frames=len(frames_to_save), interval=200, blit=True)
-    ani.save(args.output, writer="pillow", fps=5)
+    ani = animation.FuncAnimation(fig, update, frames=len(frames_to_save), interval=1000//args.fps, blit=True)
+    ani.save(args.output, writer="pillow", fps=args.fps)
     plt.close()
     
     print(f"✅ Success! Open {args.output} to view your rollout.")
